@@ -2,7 +2,7 @@ mod header;
 mod question;
 mod resource;
 
-use header::DnsHeader;
+use header::{DnsHeader, Rcode};
 use question::address_to_question;
 use resource::ResourceRecord;
 use std::net::{self, Ipv4Addr, SocketAddrV4};
@@ -32,6 +32,14 @@ fn decode_dns_message(message: Vec<u8>) -> Result<Ipv4Addr, Box<dyn std::error::
     println!("header:");
     println!("{:?}", header);
 
+    if !matches!(header.get_rcode(), Rcode::NoError) {
+        panic!("Non-zero rcode: {:?}", header.get_rcode());
+    }
+
+    if header.ancount == 0 {
+        panic!("No answers in the message");
+    }
+
     // skip question sections
     let mut index = 0;
     for _ in 0..header.qdcount {
@@ -51,7 +59,7 @@ fn decode_dns_message(message: Vec<u8>) -> Result<Ipv4Addr, Box<dyn std::error::
             answer.rdata[2] as u8,
             answer.rdata[3] as u8,
         )),
-        _ => panic!("Unknown record type"),
+        _ => panic!("Unknown record type: {:?}", answer.r#type),
     }
 }
 
@@ -64,7 +72,7 @@ pub fn lookup(address: &String) -> Result<Ipv4Addr, Box<dyn std::error::Error>> 
     message.extend(question_section);
 
     let response = send_dns_message(
-        SocketAddrV4::new(Ipv4Addr::new(192, 168, 2, 1), 53),
+        SocketAddrV4::new(Ipv4Addr::new(1, 1, 1, 1), 53),
         message.as_slice(),
     )?;
 

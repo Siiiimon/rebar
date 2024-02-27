@@ -28,7 +28,10 @@ impl ResourceRecord {
         let r#type = match (buf[2] as u16) << 8 | buf[3] as u16 {
             1 => RecordType::A,
             28 => RecordType::AAAA,
-            _ => panic!("Unknown record type"),
+            _ => panic!(
+                "Failed to parse record type: {:?}",
+                (buf[2] as u16) << 8 | buf[3] as u16
+            ),
         }; // will support more RRs as needed
         let class = match (buf[4] as u16) << 8 | buf[5] as u16 {
             1 => ClassCode::IN,
