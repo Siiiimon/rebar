@@ -10,6 +10,6 @@ fn main() {
 
     println!("Opening: {}", address);
 
-    let content = http::request_content(address).unwrap();
-    println!("Content: {}", content.body.unwrap());
+    let _content = http::request_content(address).unwrap();
+    // println!("Content: {}", content.body.unwrap());
 }

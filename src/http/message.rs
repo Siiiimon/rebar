@@ -45,9 +45,13 @@ impl HttpMessage {
 
     pub fn parse_response(response: String) -> Result<HttpMessage, Box<dyn Error>> {
         // seperate by CRLF
-        let mut lines = response.split("\r\n\r\n");
+        let mut lines = response.split("\r\n");
         let response_line =
             ResponseLine::parse(lines.next().ok_or("malformed response")?.to_string())?;
+        println!(
+            "response line: {} - {}",
+            response_line.status_code, response_line.reason_phrase
+        );
 
         let mut headers = HashMap::new();
         for line in &mut lines {
@@ -90,9 +94,8 @@ impl HttpMessage {
         }
 
         if self.body.is_none() {
-            // trailing new line comes from headers
             if let StartLine::Request(request_line) = &self.start_line {
-                format!("{}{}", request_line.to_string(), headers_string)
+                format!("{}{}\n", request_line.to_string(), headers_string)
             } else {
                 panic!("Invalid Request line");
             }

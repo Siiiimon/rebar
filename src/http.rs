@@ -2,7 +2,7 @@ use crate::dns;
 use std::{
     error::Error,
     io::prelude::*,
-    net::{Ipv4Addr, Shutdown, TcpStream},
+    net::{Ipv4Addr, TcpStream},
 };
 
 use self::message::HttpMessage;
@@ -29,7 +29,8 @@ fn send_http_message(
     let recv_len = stream.read_to_string(&mut buf)?;
     println!("Read {} bytes", recv_len);
 
-    stream.shutdown(Shutdown::Both)?;
+    // apparently this causes issues?
+    // stream.shutdown(Shutdown::Both)?;
 
     Ok(buf)
 }

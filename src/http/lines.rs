@@ -48,7 +48,10 @@ impl ResponseLine {
             .next()
             .ok_or("No status code in Response Line")?
             .parse::<u16>()?;
-        let reason_phrase = parts.collect::<Vec<&str>>().join(" ");
+        let reason_phrase = parts
+            .next()
+            .ok_or("No reason phrase in Response Line")?
+            .to_string();
         Ok(ResponseLine {
             version,
             status_code,
