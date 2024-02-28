@@ -1,8 +1,10 @@
+mod flags;
 mod header;
 mod question;
 mod resource;
 
-use header::{DnsHeader, Rcode};
+use flags::Flags;
+use header::DnsHeader;
 use question::address_to_question;
 use resource::ResourceRecord;
 use std::net::{self, Ipv4Addr, SocketAddrV4};
@@ -32,8 +34,8 @@ fn decode_dns_message(message: Vec<u8>) -> Result<Ipv4Addr, Box<dyn std::error::
     println!("header:");
     println!("{:?}", header);
 
-    if !matches!(header.get_rcode(), Rcode::NoError) {
-        panic!("Non-zero rcode: {:?}", header.get_rcode());
+    if header.has_errors() {
+        panic!("Non-zero rcode");
     }
 
     if header.ancount == 0 {
@@ -64,7 +66,7 @@ fn decode_dns_message(message: Vec<u8>) -> Result<Ipv4Addr, Box<dyn std::error::
 }
 
 pub fn lookup(address: &String) -> Result<Ipv4Addr, Box<dyn std::error::Error>> {
-    let header = DnsHeader::new_question();
+    let header = DnsHeader::new_question(Flags::RECURSION_DESIRED);
     let question_section = address_to_question(address)?;
 
     let mut message = Vec::new();
