@@ -1,6 +1,5 @@
-use crate::dns::lookup;
-
 mod dns;
+mod http;
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
@@ -11,6 +10,6 @@ fn main() {
 
     println!("Opening: {}", address);
 
-    let ip = lookup(address).unwrap();
-    println!("IP: {}", ip);
+    let content = http::request_content(address).unwrap();
+    println!("Content: {}", content.body.unwrap());
 }
