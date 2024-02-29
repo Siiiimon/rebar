@@ -1,4 +1,4 @@
-// use std::borrow::Cow;
+use std::borrow::Cow;
 use winit::{
     event::{Event, WindowEvent},
     event_loop::EventLoop,
@@ -37,43 +37,50 @@ impl App {
             .await
             .expect("Failed to create device");
 
-        // let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
-        //     label: None,
-        //     source: wgpu::ShaderSource::Wgsl(Cow::Borrowed(include_str!("shader.wgsl"))),
-        // });
+        let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
+            label: None,
+            source: wgpu::ShaderSource::Wgsl(Cow::Borrowed(include_str!(
+                "assets/shaders/shader.wgsl"
+            ))),
+        });
 
-        // let pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
-        //     label: None,
-        //     bind_group_layouts: &[],
-        //     push_constant_ranges: &[],
-        // });
+        let pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
+            label: None,
+            bind_group_layouts: &[],
+            push_constant_ranges: &[],
+        });
 
         // let swapchain_capabilities = surface.get_capabilities(&adapter);
         // let swapchain_format = swapchain_capabilities.formats[0];
-
-        // let render_pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
-        //     label: None,
-        //     layout: Some(&pipeline_layout),
-        //     vertex: wgpu::VertexState {
-        //         module: &shader,
-        //         entry_point: "vs_main",
-        //         buffers: &[],
-        //     },
-        //     fragment: Some(wgpu::FragmentState {
-        //         module: &shader,
-        //         entry_point: "fs_main",
-        //         targets: &[Some(swapchain_format.into())],
-        //     }),
-        //     primitive: wgpu::PrimitiveState::default(),
-        //     depth_stencil: None,
-        //     multisample: wgpu::MultisampleState::default(),
-        //     multiview: None,
-        // });
 
         let mut config = surface
             .get_default_config(&adapter, size.width, size.height)
             .unwrap();
         surface.configure(&device, &config);
+
+        let render_pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
+            label: None,
+            layout: Some(&pipeline_layout),
+            vertex: wgpu::VertexState {
+                module: &shader,
+                entry_point: "vs_main",
+                buffers: &[],
+            },
+            fragment: Some(wgpu::FragmentState {
+                module: &shader,
+                entry_point: "fs_main",
+                // targets: &[Some(swapchain_format.into())],
+                targets: &[Some(wgpu::ColorTargetState {
+                    format: config.format,
+                    blend: Some(wgpu::BlendState::REPLACE),
+                    write_mask: wgpu::ColorWrites::ALL,
+                })],
+            }),
+            primitive: wgpu::PrimitiveState::default(),
+            depth_stencil: None,
+            multisample: wgpu::MultisampleState::default(),
+            multiview: None,
+        });
 
         let window = &window;
         event_loop
@@ -109,7 +116,7 @@ impl App {
                                     label: None,
                                 });
                             {
-                                let mut _rpass =
+                                let mut rpass =
                                     encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
                                         label: None,
                                         color_attachments: &[Some(
@@ -131,8 +138,8 @@ impl App {
                                         timestamp_writes: None,
                                         occlusion_query_set: None,
                                     });
-                                // rpass.set_pipeline(&render_pipeline);
-                                // rpass.draw(0..3, 0..1);
+                                rpass.set_pipeline(&render_pipeline);
+                                rpass.draw(0..3, 0..1);
                             }
 
                             queue.submit(Some(encoder.finish()));
