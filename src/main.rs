@@ -1,16 +1,11 @@
 mod app;
 // mod dns;
 // mod http;
-use winit::event_loop::EventLoop;
 
 fn main() {
-    env_logger::init();
-    let event_loop = EventLoop::new().unwrap();
-    #[allow(unused_mut)]
-    let mut builder = winit::window::WindowBuilder::new();
-    let window = builder.build(&event_loop).unwrap();
+    let mut application = app::App::init();
 
-    futures::executor::block_on(app::App::run(event_loop, window));
+    futures::executor::block_on(application.run());
     // let args: Vec<String> = std::env::args().collect();
     // if args.len() != 2 {
     //     panic!("Usage: {} <address>", args[0]);
