@@ -13,8 +13,8 @@ fn main() {
     let mut application = app::App::init();
     let app_future = application.run();
 
-    let content = http::request_content(address).unwrap();
-    println!("Content: {}", content.body.unwrap());
+    // let content = http::request_content(address).unwrap();
+    // println!("Content: {}", content.body.unwrap());
 
     futures::executor::block_on(app_future);
 }
